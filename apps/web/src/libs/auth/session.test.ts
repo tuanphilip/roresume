@@ -32,6 +32,13 @@ describe("getSession", () => {
 		expect(result).toBeNull();
 	});
 
+	it("returns null when session endpoint returns 404 (not mounted or no session)", async () => {
+		getSessionMock.mockResolvedValueOnce({ data: null, error: { status: 404, message: "Not Found" } });
+
+		const result = await getSession();
+		expect(result).toBeNull();
+	});
+
 	it("throws on rate-limited responses (HTTP 429)", async () => {
 		getSessionMock.mockResolvedValueOnce({
 			data: null,

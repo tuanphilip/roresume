@@ -1,3 +1,4 @@
+import type { FeatureFlags } from "@reactive-resume/api/features/flags";
 import type { AuthSession } from "@reactive-resume/auth/types";
 import type { QueryClient } from "@tanstack/react-query";
 import { getSession } from "./auth/session";
@@ -7,6 +8,18 @@ import { getTheme } from "./theme";
 
 export const sessionQueryKey = ["auth", "session"] as const;
 const flagsQueryKey = ["flags"] as const;
+
+const defaultFlags: FeatureFlags = {
+	disableSignups: false,
+	disableEmailAuth: false,
+	allowGuestLogin: false,
+	smtpEnabled: false,
+	careerSchedulingEnabled: false,
+	appUrl: "",
+	aliasUrl: undefined,
+	customDomains: false,
+	olacvSuggestion: false,
+};
 
 // Root beforeLoad runs on every navigation and every hover preload, so the network reads come from the query cache.
 // A signed-in session is reused for a minute; a signed-out one is always re-checked, so signing in elsewhere shows up
@@ -31,11 +44,14 @@ export async function loadRootContext(queryClient: QueryClient) {
 			throw error;
 		});
 
-	const [session, flags] = await Promise.all([
-		sessionPromise,
-		queryClient.query({ queryKey: flagsQueryKey, queryFn: () => client.flags.get(), staleTime: 5 * 60_000 }),
-		loadLocale(locale),
-	]);
+	const flagsPromise = queryClient
+		.query({ queryKey: flagsQueryKey, queryFn: () => client.flags.get(), staleTime: 5 * 60_000 })
+		.catch((error: unknown) => {
+			console.warn("[flags] Failed to fetch server flags, using default flags:", error);
+			return defaultFlags;
+		});
+
+	const [session, flags] = await Promise.all([sessionPromise, flagsPromise, loadLocale(locale)]);
 
 	return { theme, locale, session, flags };
 }
