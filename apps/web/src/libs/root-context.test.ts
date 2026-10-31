@@ -67,4 +67,16 @@ describe("loadRootContext", () => {
 
 		await expect(loadRootContext(queryClient)).rejects.toThrow("Session check failed with status 500");
 	});
+
+	it("falls back to default flags when client.flags.get fails", async () => {
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		getSessionMock.mockResolvedValueOnce(null);
+		flagsGetMock.mockRejectedValueOnce(new Error("oRPC network failure 404"));
+
+		const context = await loadRootContext(queryClient);
+		expect(context.flags).toBeDefined();
+		expect(context.flags.disableSignups).toBe(false);
+	});
 });
