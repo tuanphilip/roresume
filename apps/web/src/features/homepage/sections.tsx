@@ -18,7 +18,7 @@ import { LocaleCombobox } from "@/features/locale/combobox";
 import { orpc } from "@/libs/orpc/client";
 
 const crowdinUrl = "https://crowdin.com/project/reactive-resume";
-const githubUrl = "https://github.com/reactive-resume/reactive-resume";
+const githubUrl = "https://github.com/tuanphilip/roresume";
 // The statistics service caches the totals for six hours.
 const statisticsStaleTime = 6 * 60 * 60 * 1000;
 // A fresh self-hosted install has a handful of users; a total that small reads as a joke, so it isn't shown.
